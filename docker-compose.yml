@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8096:8096"
+    environment:
+      - API_KEY=${API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+    volumes:
+      - ./app:/app/app
+    restart: unless-stopped
