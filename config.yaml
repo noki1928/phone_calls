@@ -11,7 +11,7 @@ whisper:
 openai:
   api_key: null
   base_url: https://api.aitunnel.ru/v1/
-  model: claude-haiku-4.5
+  model: qwen3.6-max-preview
   temperature: 0.0
   max_tokens: 1000
 
