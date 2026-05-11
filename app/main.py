@@ -6,11 +6,11 @@ from typing import Optional
 import tempfile
 import os
 
-from app.whisper_service import WhisperService
+from app.gigaam_service import GigaAMService
 from app.summarizer import SummarizerService
 
 
-whisper_service: Optional[WhisperService] = None
+gigaam_service: Optional[GigaAMService] = None
 summarizer_service: Optional[SummarizerService] = None
 
 
@@ -24,10 +24,10 @@ class ModelUpdate(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global whisper_service, summarizer_service
-    print("Initializing Whisper service...")
-    whisper_service = WhisperService()
-    whisper_service.initialize()
+    global gigaam_service, summarizer_service
+    print("Initializing GigaAM service...")
+    gigaam_service = GigaAMService()
+    gigaam_service.initialize()
     
     print("Initializing Summarizer service...")
     summarizer_service = SummarizerService()
@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
     print("Shutting down...")
 
 
-app = FastAPI(title="Whisper + Summarizer API", lifespan=lifespan)
+app = FastAPI(title="GigaAM + Summarizer API", lifespan=lifespan)
 
 
 @app.post("/transcribe-and-summarize")
@@ -54,7 +54,7 @@ async def transcribe_and_summarize(
         tmp_path = tmp.name
 
     try:
-        transcription = whisper_service.transcribe(tmp_path)
+        transcription = gigaam_service.transcribe(tmp_path)
         summary = summarizer_service.summarize(transcription)
 
         return JSONResponse(content={

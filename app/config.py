@@ -16,15 +16,17 @@ class PromptConfig(BaseModel):
     default: str
 
 
-class WhisperConfig(BaseModel):
-    model_size: str
+class GigaAMConfig(BaseModel):
+    model_name: str
     device: str
-    compute_type: str
-    language: str
+    pyannote_model: str
     hf_token: Optional[str]
-    num_speakers: int
-    min_speakers: int
-    max_speakers: int
+    num_speakers: Optional[int]
+    min_speakers: Optional[int]
+    max_speakers: Optional[int]
+    fr_batch_size: int
+    fr_num_workers: int
+    merge_gap: float
 
 
 class OpenAIConfig(BaseModel):
@@ -36,7 +38,7 @@ class OpenAIConfig(BaseModel):
 
 
 class Settings(BaseModel):
-    whisper: WhisperConfig
+    gigaam: GigaAMConfig
     openai: OpenAIConfig
     prompts: PromptConfig
 
@@ -46,7 +48,7 @@ class Settings(BaseModel):
 
     @property
     def hf_token(self) -> Optional[str]:
-        return os.environ.get("HF_TOKEN", self.whisper.hf_token)
+        return os.environ.get("HF_TOKEN", self.gigaam.hf_token)
 
 
 @lru_cache()

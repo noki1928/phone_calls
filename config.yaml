@@ -1,12 +1,14 @@
-whisper:
-  model_size: medium
+gigaam:
+  model_name: v3_e2e_rnnt
   device: cpu
-  compute_type: float32
-  language: ru
+  pyannote_model: pyannote/speaker-diarization-community-1
   hf_token: null
   num_speakers: 2
   min_speakers: 1
   max_speakers: 2
+  fr_batch_size: 16
+  fr_num_workers: 0
+  merge_gap: 1.0
 
 openai:
   api_key: null
