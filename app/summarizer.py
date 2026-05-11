@@ -29,12 +29,17 @@ class SummarizerService:
 
     def summarize(self, text: str, custom_prompt: Optional[str] = None) -> str:
         system_prompt = custom_prompt or self.system_prompt
+        user_prompt = (
+            "Выполни суммаризацию строго по системной инструкции. "
+            "Не добавляй Markdown, списки, заголовки с # и пояснения вне заданного формата.\n\n"
+            f"Диалог:\n{text}"
+        )
 
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": text}
+                {"role": "user", "content": user_prompt}
             ],
             temperature=self.temperature,
             max_tokens=self.max_tokens

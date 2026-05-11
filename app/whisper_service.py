@@ -67,6 +67,6 @@ class WhisperService:
         final_string = ""
         for seg in result["segments"]:
             speaker = seg.get("speaker", "UNKNOWN")
-            final_string += f"[{speaker}] {seg['text']}\n"
+            final_string += f"[{speaker}] {seg['text']}"
 
         return final_string
