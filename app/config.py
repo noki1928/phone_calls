@@ -24,6 +24,9 @@ class GigaAMConfig(BaseModel):
     num_speakers: Optional[int]
     min_speakers: Optional[int]
     max_speakers: Optional[int]
+    vad_onset: float
+    vad_offset: float
+    chunk_size: float
     fr_batch_size: int
     fr_num_workers: int
     merge_gap: float

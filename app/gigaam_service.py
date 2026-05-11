@@ -2,7 +2,7 @@ import warnings
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-import gigaam
+from app import gigaam
 
 from app.config import settings
 
@@ -23,6 +23,9 @@ class GigaAMService:
         self.num_speakers = settings.gigaam.num_speakers
         self.min_speakers = settings.gigaam.min_speakers
         self.max_speakers = settings.gigaam.max_speakers
+        self.vad_onset = settings.gigaam.vad_onset
+        self.vad_offset = settings.gigaam.vad_offset
+        self.chunk_size = settings.gigaam.chunk_size
         self.fr_batch_size = settings.gigaam.fr_batch_size
         self.fr_num_workers = settings.gigaam.fr_num_workers
         self.merge_gap = settings.gigaam.merge_gap
@@ -48,6 +51,9 @@ class GigaAMService:
             word_timestamps=True,
             fr_batch_size=self.fr_batch_size,
             fr_num_workers=self.fr_num_workers,
+            vad_onset=self.vad_onset,
+            vad_offset=self.vad_offset,
+            chunk_size=self.chunk_size,
         )
         speaker_segments = self._diarize(audio_path)
         self._assign_speakers(transcription, speaker_segments)
