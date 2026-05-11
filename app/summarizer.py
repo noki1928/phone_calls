@@ -27,8 +27,8 @@ class SummarizerService:
         self.system_prompt = system_prompt
         return self.system_prompt
 
-    def summarize(self, text: str, custom_prompt: Optional[str] = None) -> str:
-        system_prompt = custom_prompt or self.system_prompt
+    def summarize(self, text: str) -> str:
+        system_prompt = self.system_prompt
         user_prompt = (
             "Выполни суммаризацию строго по системной инструкции. "
             "Не добавляй Markdown, списки, заголовки с # и пояснения вне заданного формата.\n\n"

@@ -39,8 +39,7 @@ app = FastAPI(title="Whisper + Summarizer API", lifespan=lifespan)
 
 @app.post("/transcribe-and-summarize")
 async def transcribe_and_summarize(
-    file: UploadFile = File(..., description="WAV audio file"),
-    custom_prompt: Optional[str] = Form(None, description="Optional custom system prompt for summarization")
+    file: UploadFile = File(..., description="WAV audio file")
 ):
     if not file.filename.lower().endswith(('.wav', '.wave')):
         raise HTTPException(status_code=400, detail="Only WAV files are supported")
@@ -52,7 +51,7 @@ async def transcribe_and_summarize(
 
     try:
         transcription = whisper_service.transcribe(tmp_path)
-        summary = summarizer_service.summarize(transcription, custom_prompt)
+        summary = summarizer_service.summarize(transcription)
 
         return JSONResponse(content={
             "transcription": transcription,

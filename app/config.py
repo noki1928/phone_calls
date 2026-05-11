@@ -14,8 +14,6 @@ CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.yaml"
 
 class PromptConfig(BaseModel):
     default: str
-    summary_short: str
-    summary_detailed: str
 
 
 class WhisperConfig(BaseModel):
