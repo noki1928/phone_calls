@@ -1,0 +1,25 @@
+whisper:
+  model_size: medium
+  device: cpu
+  compute_type: float32
+  language: ru
+  hf_token: null
+  num_speakers: 2
+  min_speakers: 1
+  max_speakers: 2
+
+openai:
+  api_key: null
+  base_url: https://api.aitunnel.ru/v1/
+  model: claude-haiku-4.5
+  temperature: 0.3
+  max_tokens: 1000
+
+prompts:
+  default: >-
+    Сейчас будет представлен диалог техподдержки компании Нетикс с клиентом.
+    Tвоя задача собрать целый диалог, суммаризировать диалог в 3-4 предложениях,
+    а также дать эмоциональную окраску, был ли клиент грубым или нет. Предоставь ответ тремя блоками:
+    название в одно предложение, суммаризация, оценка емоциональной окраски. Не используй эмоджи, пиши строго и формально
+  summary_short: "Создай краткое резюме (2-3 предложения):"
+  summary_detailed: "Создай подробное резюме текста, выделив ключевые моменты:"

@@ -17,6 +17,16 @@ class SummarizerService:
         self.max_tokens = settings.openai.max_tokens
         self.system_prompt = settings.prompts.default
 
+    def get_system_prompt(self) -> str:
+        return self.system_prompt
+
+    def set_system_prompt(self, system_prompt: str) -> str:
+        if not system_prompt.strip():
+            raise ValueError("System prompt must not be empty")
+
+        self.system_prompt = system_prompt
+        return self.system_prompt
+
     def summarize(self, text: str, custom_prompt: Optional[str] = None) -> str:
         system_prompt = custom_prompt or self.system_prompt
 

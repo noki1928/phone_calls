@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
+from pydantic import BaseModel
 from typing import Optional
 import tempfile
 import os
@@ -11,6 +12,10 @@ from app.summarizer import SummarizerService
 
 whisper_service: Optional[WhisperService] = None
 summarizer_service: Optional[SummarizerService] = None
+
+
+class SystemPromptUpdate(BaseModel):
+    system_prompt: str
 
 
 @asynccontextmanager
@@ -64,6 +69,21 @@ async def transcribe_and_summarize(
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+
+@app.get("/summarization/system-prompt")
+async def get_summarization_system_prompt():
+    return {"system_prompt": summarizer_service.get_system_prompt()}
+
+
+@app.put("/summarization/system-prompt")
+async def set_summarization_system_prompt(update: SystemPromptUpdate):
+    try:
+        system_prompt = summarizer_service.set_system_prompt(update.system_prompt)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return {"system_prompt": system_prompt}
 
 
 if __name__ == "__main__":
