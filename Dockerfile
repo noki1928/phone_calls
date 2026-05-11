@@ -1,5 +1,11 @@
 FROM python:3.11-slim
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    XDG_CACHE_HOME=/cache \
+    HF_HOME=/cache/huggingface
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
@@ -8,12 +14,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY app ./app
+COPY config.yaml ./config.yaml
 
-ENV PYTHONPATH=/app
+RUN mkdir -p /cache \
+    && useradd --create-home --shell /usr/sbin/nologin appuser \
+    && chown -R appuser:appuser /app /cache
+
+USER appuser
 
 EXPOSE 8096
 
-CMD ["python", "-m", "app.main"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8096"]

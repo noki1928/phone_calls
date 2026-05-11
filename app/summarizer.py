@@ -1,5 +1,4 @@
 from openai import OpenAI
-from typing import Optional
 
 from app.config import settings
 
@@ -26,6 +25,16 @@ class SummarizerService:
 
         self.system_prompt = system_prompt
         return self.system_prompt
+
+    def get_model(self) -> str:
+        return self.model
+
+    def set_model(self, model: str) -> str:
+        if not model.strip():
+            raise ValueError("Model must not be empty")
+
+        self.model = model.strip()
+        return self.model
 
     def summarize(self, text: str) -> str:
         system_prompt = self.system_prompt

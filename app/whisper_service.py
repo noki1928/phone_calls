@@ -64,9 +64,9 @@ class WhisperService:
 
         result = whisperx.assign_word_speakers(diarize_segments, result)
 
-        final_string = ""
+        segments = []
         for seg in result["segments"]:
             speaker = seg.get("speaker", "UNKNOWN")
-            final_string += f"[{speaker}] {seg['text']}"
+            segments.append(f"[{speaker}] {seg['text'].strip()}")
 
-        return final_string
+        return "\n".join(segments)

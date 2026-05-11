@@ -1,0 +1,10 @@
+.git
+.env
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+test.wav
+*.wav
+*.wave
+*.log

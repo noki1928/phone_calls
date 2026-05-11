@@ -3,9 +3,17 @@ services:
     build: .
     ports:
       - "8096:8096"
-    environment:
-      - API_KEY=${API_KEY}
-      - HF_TOKEN=${HF_TOKEN}
     volumes:
-      - ./app:/app/app
+      - ./.env:/app/.env:ro
+      - ./config.yaml:/app/config.yaml:ro
+      - model-cache:/cache
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8096/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
     restart: unless-stopped
+
+volumes:
+  model-cache:

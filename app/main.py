@@ -18,6 +18,10 @@ class SystemPromptUpdate(BaseModel):
     system_prompt: str
 
 
+class ModelUpdate(BaseModel):
+    model: str
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global whisper_service, summarizer_service
@@ -83,6 +87,21 @@ async def set_summarization_system_prompt(update: SystemPromptUpdate):
         raise HTTPException(status_code=400, detail=str(e))
 
     return {"system_prompt": system_prompt}
+
+
+@app.get("/summarization/model")
+async def get_summarization_model():
+    return {"model": summarizer_service.get_model()}
+
+
+@app.put("/summarization/model")
+async def set_summarization_model(update: ModelUpdate):
+    try:
+        model = summarizer_service.set_model(update.model)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return {"model": model}
 
 
 if __name__ == "__main__":
