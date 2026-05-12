@@ -27,6 +27,7 @@ class WhisperConfig(BaseModel):
     device: str
     compute_type: str
     language: str
+    initial_prompt: Optional[str] = None
     hf_token: Optional[str]
     num_speakers: int
     min_speakers: int

@@ -63,6 +63,9 @@ whisper:
   device: cpu
   compute_type: float32
   language: ru
+  initial_prompt: >-
+    В разговоре может встречаться компания Нетикс. Возможные термины:
+    GPON, ONT, роутер, биллинг, лицевой счет, техподдержка.
   hf_token: null
   num_speakers: 2
   min_speakers: 1
@@ -136,6 +139,7 @@ HF_TOKEN=ваш_huggingface_token
 - `device`: устройство для инференса, `cpu` или `cuda`.
 - `compute_type`: тип вычислений, например `float32`, `float16`, `int8`.
 - `language`: язык аудио, для русских звонков `ru`.
+- `initial_prompt`: контекстная подсказка для WhisperX/faster-whisper. Передается при загрузке модели через `asr_options`, помогает модели чаще выбирать правильные названия, аббревиатуры и технические термины, но не является жестким словарем замен.
 - `num_speakers`: точное число спикеров, если известно.
 - `min_speakers`: минимальное число спикеров для pyannote.
 - `max_speakers`: максимальное число спикеров для pyannote.

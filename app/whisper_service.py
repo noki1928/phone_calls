@@ -16,6 +16,7 @@ class WhisperService:
         self.model_size = settings.whisper.model_size
         self.compute_type = settings.whisper.compute_type
         self.language = settings.whisper.language
+        self.initial_prompt = settings.whisper.initial_prompt
         self.hf_token = settings.hf_token
         self.num_speakers = settings.whisper.num_speakers
         self.min_speakers = settings.whisper.min_speakers
@@ -30,10 +31,15 @@ class WhisperService:
         """Load the transcription, alignment, and diarization models."""
 
         print(f"Loading Whisper model: {self.model_size}")
+        asr_options = {}
+        if self.initial_prompt:
+            asr_options["initial_prompt"] = self.initial_prompt
+
         self.model = whisperx.load_model(
             self.model_size,
             self.device,
-            compute_type=self.compute_type
+            compute_type=self.compute_type,
+            asr_options=asr_options or None,
         )
         
         print("Loading align model...")
