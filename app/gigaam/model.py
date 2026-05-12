@@ -1,3 +1,5 @@
+"""GigaAM model wrappers for embeddings, ASR, emotion, and long-form audio."""
+
 from typing import Dict, List, Optional, Tuple
 
 import hydra
@@ -38,10 +40,14 @@ class GigaAM(nn.Module):
 
     @property
     def _device(self) -> torch.device:
+        """Return the device where model parameters are stored."""
+
         return next(self.parameters()).device
 
     @property
     def _dtype(self) -> torch.dtype:
+        """Return the dtype used by model parameters."""
+
         return next(self.parameters()).dtype
 
     def prepare_wav(self, wav_file: str) -> Tuple[Tensor, Tensor]:

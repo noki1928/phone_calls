@@ -1,3 +1,5 @@
+"""Audio loading and feature extraction utilities for GigaAM."""
+
 import warnings
 from subprocess import CalledProcessError, run
 from typing import Tuple
@@ -47,6 +49,8 @@ class SpecScaler(nn.Module):
     """
 
     def forward(self, x: Tensor) -> Tensor:
+        """Apply logarithmic scaling to spectrogram values."""
+
         return torch.log(x.clamp_(1e-9, 1e9))
 
 
@@ -58,6 +62,8 @@ class FeatureExtractor(nn.Module):
     """
 
     def __init__(self, sample_rate: int, features: int, **kwargs):
+        """Create a log-mel feature extractor for the given sample rate."""
+
         super().__init__()
         self.hop_length = kwargs.get("hop_length", sample_rate // 100)
         self.win_length = kwargs.get("win_length", sample_rate // 40)

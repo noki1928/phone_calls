@@ -1,3 +1,5 @@
+"""Conformer encoder layers and positional encoding blocks for GigaAM."""
+
 import math
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
@@ -26,6 +28,8 @@ def _conformer_layer_fwd(
     att_mask: Optional[Tensor],
     pad_mask: Optional[Tensor],
 ) -> Tensor:
+    """Forward wrapper used by activation checkpointing."""
+
     return layer(x=x, pos_emb=pos_emb, att_mask=att_mask, pad_mask=pad_mask)
 
 

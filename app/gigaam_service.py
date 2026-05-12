@@ -1,3 +1,5 @@
+"""GigaAM transcription service with pyannote speaker diarization."""
+
 import warnings
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -9,13 +11,19 @@ from app.config import settings
 
 @dataclass
 class SpeakerSegment:
+    """Single diarization segment with normalized speaker label."""
+
     start: float
     end: float
     speaker: str
 
 
 class GigaAMService:
+    """Load GigaAM and pyannote models and build speaker-attributed transcripts."""
+
     def __init__(self):
+        """Read service settings and prepare model placeholders."""
+
         self.device = settings.gigaam.device
         self.model_name = settings.gigaam.model_name
         self.pyannote_model = settings.gigaam.pyannote_model
@@ -34,6 +42,8 @@ class GigaAMService:
         self.diarize_model = None
 
     def initialize(self):
+        """Load the GigaAM transcription model and pyannote diarization pipeline."""
+
         print(f"Loading GigaAM model: {self.model_name}")
         self.model = gigaam.load_model(self.model_name, device=self.device)
 
@@ -43,6 +53,8 @@ class GigaAMService:
         print("GigaAM and pyannote models loaded")
 
     def transcribe(self, audio_path: str) -> str:
+        """Transcribe an audio file and return text grouped by speaker."""
+
         if self.model is None or self.diarize_model is None:
             raise RuntimeError("GigaAM service not initialized")
 
@@ -62,6 +74,8 @@ class GigaAMService:
         return "\n".join(f"[{turn['speaker']}] {turn['text']}" for turn in turns)
 
     def _load_diarization_model(self):
+        """Create the pyannote diarization pipeline from configured settings."""
+
         if not self.hf_token:
             raise RuntimeError("HF_TOKEN is required for pyannote diarization")
 
@@ -88,6 +102,8 @@ class GigaAMService:
         return pipeline
 
     def _diarize(self, audio_path: str) -> List[SpeakerSegment]:
+        """Run diarization and return sorted speaker segments."""
+
         kwargs = {}
         if self.num_speakers is not None:
             kwargs["num_speakers"] = self.num_speakers
@@ -119,6 +135,8 @@ class GigaAMService:
         return self._rename_speakers(segments)
 
     def _assign_speakers(self, transcription, speaker_segments: List[SpeakerSegment]) -> None:
+        """Assign the best-overlap speaker label to segments and words."""
+
         for segment in transcription:
             segment.speaker = self._speaker_by_overlap(
                 segment.start,
@@ -135,6 +153,8 @@ class GigaAMService:
                     word.speaker = segment.speaker or "UNKNOWN"
 
     def _build_speaker_turns(self, transcription) -> List[dict]:
+        """Merge word or segment items into speaker turns."""
+
         items = []
         for segment in transcription:
             if segment.words:
@@ -182,6 +202,8 @@ class GigaAMService:
 
     @staticmethod
     def _rename_speakers(segments: List[SpeakerSegment]) -> List[SpeakerSegment]:
+        """Normalize diarization labels to stable SPEAKER_XX names."""
+
         speaker_map = {}
         for segment in segments:
             if segment.speaker not in speaker_map:
@@ -195,6 +217,8 @@ class GigaAMService:
         end: float,
         speaker_segments: List[SpeakerSegment],
     ) -> Optional[str]:
+        """Return the speaker with the largest overlap for a time span."""
+
         overlaps: Dict[str, float] = {}
         for segment in speaker_segments:
             overlap = max(0.0, min(end, segment.end) - max(start, segment.start))
@@ -207,6 +231,8 @@ class GigaAMService:
 
     @staticmethod
     def _normalize_spacing(text: str) -> str:
+        """Remove extra spaces around punctuation and inside text."""
+
         for punctuation in [".", ",", "!", "?", ":", ";"]:
             text = text.replace(f" {punctuation}", punctuation)
         return " ".join(text.split())

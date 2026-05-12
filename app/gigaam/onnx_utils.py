@@ -1,3 +1,5 @@
+"""ONNX loading and inference utilities for exported GigaAM models."""
+
 import logging
 import warnings
 from pathlib import Path
@@ -33,6 +35,8 @@ def _session_float_dtype(session: rt.InferenceSession) -> np.dtype:
 
 
 def _build_inputs(session: rt.InferenceSession, values: List[np.ndarray]) -> dict:
+    """Map positional numpy arrays to ONNX session input names."""
+
     return {node.name: data for node, data in zip(session.get_inputs(), values)}
 
 
@@ -41,6 +45,8 @@ def _decode_ctc_batch(
     lengths: np.ndarray,
     tokenizer: Tokenizer,
 ) -> List[str]:
+    """Decode a batch of CTC labels into strings."""
+
     blank_id = len(tokenizer)
     b, t = labels.shape
     lengths = np.clip(np.asarray(lengths, dtype=np.int64).reshape(-1), 0, t)
@@ -57,6 +63,8 @@ def _decode_ctc_batch(
 def _cat_states(
     states: List[Tuple[np.ndarray, np.ndarray]],
 ) -> Tuple[np.ndarray, np.ndarray]:
+    """Pack per-sample RNN-T states into batched arrays."""
+
     hs = [s[0] for s in states]
     cs = [s[1] for s in states]
     return np.concatenate(hs, axis=1), np.concatenate(cs, axis=1)
@@ -65,6 +73,8 @@ def _cat_states(
 def _split_state(
     state: Tuple[np.ndarray, np.ndarray],
 ) -> List[Tuple[np.ndarray, np.ndarray]]:
+    """Unpack batched RNN-T states into per-sample states."""
+
     h, c = state
     b = h.shape[1]
     return [(h[:, i : i + 1], c[:, i : i + 1]) for i in range(b)]
@@ -77,6 +87,8 @@ def _decode_rnnt_batch(
     sessions: List[Optional[rt.InferenceSession]],
     tokenizer: Tokenizer,
 ) -> List[str]:
+    """Decode a batch of encoder features with exported RNN-T sessions."""
+
     pred_sess, joint_sess = sessions[1:]
     dtype = _session_float_dtype(pred_sess)
 
@@ -280,6 +292,8 @@ def infer_onnx(
 
 
 def _providers_list(provider: Optional[str]) -> List[Union[str, Tuple[str, dict]]]:
+    """Return ONNX Runtime providers with CUDA fallback to CPU."""
+
     if provider == "CPUExecutionProvider":
         return ["CPUExecutionProvider"]
     if provider is not None and provider != "CUDAExecutionProvider":

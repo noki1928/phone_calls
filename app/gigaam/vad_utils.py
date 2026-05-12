@@ -1,3 +1,5 @@
+"""Voice activity detection helpers for long-form GigaAM transcription."""
+
 import os
 from typing import List, Optional, Tuple
 
@@ -19,6 +21,8 @@ _PIPELINE_PARAMS = None
 
 
 class Binarize:
+    """Convert frame-level speech scores into active speech regions."""
+
     def __init__(
         self,
         onset: float = 0.5,
@@ -27,6 +31,8 @@ class Binarize:
         min_duration_off: float = 0.0,
         max_duration: float = float("inf"),
     ):
+        """Configure speech activation thresholds and duration limits."""
+
         self.onset = onset
         self.offset = offset or onset
         self.min_duration_on = min_duration_on
@@ -34,6 +40,8 @@ class Binarize:
         self.max_duration = max_duration
 
     def __call__(self, scores: SlidingWindowFeature) -> Annotation:
+        """Return speech annotations from raw segmentation scores."""
+
         num_frames, _ = scores.data.shape
         frames = scores.sliding_window
         timestamps = [frames[i].middle for i in range(num_frames)]
@@ -86,7 +94,11 @@ class Binarize:
 
 
 class VoiceActivitySegmentation(VoiceActivityDetection):
+    """pyannote VAD pipeline variant that returns raw segmentation scores."""
+
     def apply(self, file: AudioFile, hook=None) -> SlidingWindowFeature:
+        """Run segmentation and reuse cached scores during training."""
+
         hook = self.setup_hook(file, hook=hook)
         if self.training:
             if self.CACHED_SEGMENTATION in file:
@@ -98,9 +110,8 @@ class VoiceActivitySegmentation(VoiceActivityDetection):
 
 
 def resolve_local_segmentation_path(model_id: str) -> str:
-    """
-    Finds the local path to the segmentation model.
-    """
+    """Find or download a local snapshot for the segmentation model."""
+
     try:
         return snapshot_download(
             repo_id=model_id,
@@ -123,10 +134,8 @@ def resolve_local_segmentation_path(model_id: str) -> str:
 
 
 def load_segmentation_model(model_id: str) -> Model:
-    """
-    Loads the segmentation model from a local snapshot.
-    If it doesn’t exist, it first creates (downloads) the snapshot.
-    """
+    """Load a pyannote segmentation model from a local snapshot."""
+
     local_path = resolve_local_segmentation_path(model_id=model_id)
 
     with torch.serialization.safe_globals(
@@ -146,11 +155,8 @@ def get_pipeline(
     vad_onset: float = 0.500,
     vad_offset: float = 0.363,
 ) -> Pipeline:
-    """
-    Retrieves a PyAnnote voice activity detection pipeline and moves it to the specified device.
-    The pipeline is loaded only once and reused across subsequent calls.
-    It requires the Hugging Face API token to be set in the HF_TOKEN environment variable.
-    """
+    """Return a cached pyannote VAD pipeline on the requested device."""
+
     global _PIPELINE, _PIPELINE_PARAMS
     pipeline_params = (model_id, vad_onset, vad_offset)
     if _PIPELINE is not None and _PIPELINE_PARAMS == pipeline_params:
@@ -177,10 +183,7 @@ def segment_audio_file(
     vad_offset: float = 0.363,
     device: torch.device = torch.device("cpu"),
 ) -> Tuple[List[torch.Tensor], List[Tuple[float, float]]]:
-    """
-    Segments an audio waveform into smaller chunks based on speech activity.
-    The segmentation is performed using a PyAnnote voice activity detection pipeline.
-    """
+    """Split an audio file into speech chunks using pyannote VAD scores."""
 
     max_duration = chunk_size if max_duration is None else max_duration
     min_duration = chunk_size if min_duration is None else min_duration
@@ -202,6 +205,8 @@ def segment_audio_file(
     boundaries: List[Tuple[float, float]] = []
 
     def _update_segments(curr_start: float, curr_end: float, curr_duration: float):
+        """Append a chunk, splitting it when it exceeds the strict limit."""
+
         if curr_duration > strict_limit_duration:
             max_segments = int(curr_duration / strict_limit_duration) + 1
             segment_duration = curr_duration / max_segments

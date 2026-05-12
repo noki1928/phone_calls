@@ -1,3 +1,5 @@
+"""General GigaAM utilities for ONNX export, attention, samples, and formatting."""
+
 import csv
 import os
 import warnings
@@ -81,6 +83,8 @@ def format_time(seconds: float) -> str:
 
 
 def rtt_half(x: Tensor) -> Tensor:
+    """Rotate the last tensor dimension by half for rotary embeddings."""
+
     x1, x2 = x[..., : x.shape[-1] // 2], x[..., x.shape[-1] // 2 :]
     return torch.cat([-x2, x1], dim=x1.ndim - 1)
 

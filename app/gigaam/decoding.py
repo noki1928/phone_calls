@@ -1,3 +1,5 @@
+"""Greedy decoders and tokenizer helpers for GigaAM ASR heads."""
+
 from typing import List, Optional, Tuple
 
 import torch
@@ -14,6 +16,8 @@ class Tokenizer:
     """
 
     def __init__(self, vocab: List[str], model_path: Optional[str] = None):
+        """Initialize a character or SentencePiece tokenizer."""
+
         self.charwise = model_path is None
         if self.charwise:
             self.vocab = vocab
@@ -50,6 +54,8 @@ class CTCGreedyDecoding:
     """
 
     def __init__(self, vocabulary: List[str], model_path: Optional[str] = None):
+        """Create a CTC greedy decoder for the provided vocabulary."""
+
         self.tokenizer = Tokenizer(vocabulary, model_path)
         self.blank_id = len(self.tokenizer)
 
@@ -107,6 +113,8 @@ class RNNTGreedyDecoding:
         model_path: Optional[str] = None,
         max_symbols_per_step: int = 10,
     ):
+        """Create an RNN-T greedy decoder for the provided vocabulary."""
+
         self.tokenizer = Tokenizer(vocabulary, model_path)
         self.blank_id = len(self.tokenizer)
         self.max_symbols = max_symbols_per_step

@@ -1,3 +1,5 @@
+"""WhisperX-style speaker diarization helpers for GigaAM transcripts."""
+
 import argparse
 import json
 import os
@@ -16,15 +18,21 @@ DEFAULT_PYANNOTE_MODEL = "pyannote/speaker-diarization-community-1"
 
 @dataclass
 class DiarizedTranscriptionResult:
+    """Transcription result enriched with speaker turns and diarization segments."""
+
     segments: List[Segment]
     speaker_segments: List[SpeakerSegment]
 
     @property
     def text(self) -> str:
+        """Return the full transcript text without speaker labels."""
+
         return " ".join(segment.text for segment in self.segments)
 
     @property
     def words(self) -> List[Word]:
+        """Return all word-level items from speaker turns."""
+
         result: List[Word] = []
         for segment in self.segments:
             if segment.words:
@@ -32,6 +40,8 @@ class DiarizedTranscriptionResult:
         return result
 
     def to_txt(self, include_timestamps: bool = False) -> str:
+        """Render the diarized transcript as plain text."""
+
         lines = []
         for segment in self.segments:
             speaker = segment.speaker or "UNKNOWN"
@@ -44,6 +54,8 @@ class DiarizedTranscriptionResult:
         return "\n".join(lines)
 
     def to_json(self, indent: int = 2) -> str:
+        """Serialize the diarized transcript and speaker segments to JSON."""
+
         data = {
             "segments": [
                 {
@@ -76,10 +88,14 @@ class DiarizedTranscriptionResult:
         return json.dumps(data, ensure_ascii=False, indent=indent)
 
     def __str__(self) -> str:
+        """Return the plain-text representation."""
+
         return self.to_txt()
 
 
 def _resolve_device(device: Optional[Union[str, torch.device]]) -> torch.device:
+    """Resolve auto, string, or torch device input to a torch device."""
+
     if isinstance(device, torch.device):
         return device
     if device is None or device == "auto":
@@ -92,6 +108,8 @@ def load_pyannote_pipeline(
     model_name: str = DEFAULT_PYANNOTE_MODEL,
     device: Optional[Union[str, torch.device]] = None,
 ):
+    """Load a pyannote diarization pipeline and move it to the target device."""
+
     token = hf_token or os.getenv("HF_TOKEN")
     if not token:
         raise ValueError("HF_TOKEN is required for pyannote diarization")
@@ -122,6 +140,8 @@ def diarize_audio(
     min_speakers: Optional[int] = None,
     max_speakers: Optional[int] = None,
 ) -> List[SpeakerSegment]:
+    """Run pyannote diarization and return normalized speaker segments."""
+
     pipeline = pipeline or load_pyannote_pipeline(
         hf_token=hf_token,
         model_name=pyannote_model,
@@ -163,6 +183,8 @@ def assign_speakers(
     transcription: LongformTranscriptionResult,
     speaker_segments: List[SpeakerSegment],
 ) -> LongformTranscriptionResult:
+    """Assign speaker labels to transcript segments and words by overlap."""
+
     for segment in transcription.segments:
         segment.speaker = _speaker_by_overlap(segment.start, segment.end, speaker_segments)
         if not segment.words:
@@ -181,6 +203,8 @@ def build_speaker_turns(
     max_gap: float = 1.0,
     max_turn_duration: float = 60.0,
 ) -> List[Segment]:
+    """Build merged speaker turns from word-level or segment-level transcript items."""
+
     items = _word_items(transcription)
     if not items:
         items = _segment_items(transcription)
@@ -232,6 +256,8 @@ def transcribe_with_diarization(
     merge_gap: float = 1.0,
     **longform_kwargs,
 ) -> DiarizedTranscriptionResult:
+    """Transcribe audio with GigaAM and enrich the result with pyannote speakers."""
+
     if isinstance(model_or_name, str):
         from . import load_model
 
@@ -265,6 +291,8 @@ def transcribe_with_diarization(
 
 
 def _rename_speakers(segments: List[SpeakerSegment]) -> List[SpeakerSegment]:
+    """Normalize diarization labels to stable SPEAKER_XX names."""
+
     seen: Dict[str, str] = {}
     for segment in segments:
         if segment.speaker not in seen:
@@ -277,6 +305,8 @@ def _speaker_at_time(
     time: float,
     speaker_segments: List[SpeakerSegment],
 ) -> Optional[str]:
+    """Return the speaker active at a specific timestamp."""
+
     for segment in speaker_segments:
         if segment.start <= time <= segment.end:
             return segment.speaker
@@ -288,6 +318,8 @@ def _speaker_by_overlap(
     end: float,
     speaker_segments: List[SpeakerSegment],
 ) -> Optional[str]:
+    """Return the speaker with the largest overlap for a time span."""
+
     overlaps: Dict[str, float] = {}
     for segment in speaker_segments:
         overlap = max(0.0, min(end, segment.end) - max(start, segment.start))
@@ -299,6 +331,8 @@ def _speaker_by_overlap(
 
 
 def _word_items(transcription: LongformTranscriptionResult) -> List[dict]:
+    """Convert word-level transcription data to sortable turn items."""
+
     items = []
     for segment in transcription.segments:
         for word in segment.words or []:
@@ -317,6 +351,8 @@ def _word_items(transcription: LongformTranscriptionResult) -> List[dict]:
 
 
 def _segment_items(transcription: LongformTranscriptionResult) -> List[dict]:
+    """Convert segment-level transcription data to sortable turn items."""
+
     items = []
     for segment in transcription.segments:
         text = segment.text.strip()
@@ -333,6 +369,8 @@ def _segment_items(transcription: LongformTranscriptionResult) -> List[dict]:
 
 
 def _normalize_spacing(text: str) -> str:
+    """Remove extra spaces around punctuation and inside text."""
+
     for punctuation in [".", ",", "!", "?", ":", ";"]:
         text = text.replace(f" {punctuation}", punctuation)
     return " ".join(text.split())
@@ -350,6 +388,8 @@ __all__ = [
 
 
 def main() -> None:
+    """Run the command-line diarized transcription entry point."""
+
     parser = argparse.ArgumentParser(
         description="WhisperX-style GigaAM transcription with pyannote diarization"
     )

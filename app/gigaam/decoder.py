@@ -1,3 +1,5 @@
+"""Neural decoder heads used by GigaAM ASR models."""
+
 from typing import Dict, List, Optional, Tuple
 
 import torch
@@ -16,6 +18,8 @@ class CTCHead(nn.Module):
         )
 
     def forward(self, encoder_output: Tensor) -> Tensor:
+        """Project encoder output to CTC log probabilities."""
+
         return torch.nn.functional.log_softmax(
             self.decoder_layers(encoder_output).transpose(1, 2), dim=-1
         )
@@ -47,18 +51,26 @@ class RNNTJoint(nn.Module):
         return self.joint_net(enc + pred).log_softmax(-1)
 
     def input_example(self, batch_size: int = 8) -> Tuple[Tensor, Tensor]:
+        """Return example inputs for ONNX export."""
+
         device = next(self.parameters()).device
         enc = torch.zeros(batch_size, self.enc_hidden, 1)
         dec = torch.zeros(batch_size, self.pred_hidden, 1)
         return enc.float().to(device), dec.float().to(device)
 
     def input_names(self) -> List[str]:
+        """Return ONNX input names."""
+
         return ["enc", "dec"]
 
     def output_names(self) -> List[str]:
+        """Return ONNX output names."""
+
         return ["joint"]
 
     def dynamic_axes(self) -> Dict[str, Dict[int, str]]:
+        """Return dynamic axes used for ONNX export."""
+
         return {
             "enc": {0: "batch_size"},
             "dec": {0: "batch_size"},
@@ -66,6 +78,8 @@ class RNNTJoint(nn.Module):
         }
 
     def forward(self, enc: Tensor, dec: Tensor) -> Tensor:
+        """Run the joint network on encoder and decoder states."""
+
         return self.joint(enc.transpose(1, 2), dec.transpose(1, 2))
 
 
@@ -102,6 +116,8 @@ class RNNTDecoder(nn.Module):
         return g.transpose(0, 1), hid
 
     def input_example(self, batch_size: int = 8) -> Tuple[Tensor, Tensor, Tensor]:
+        """Return example decoder inputs for ONNX export."""
+
         device = next(self.parameters()).device
         label = torch.zeros(batch_size, 1, dtype=torch.long).to(device)
         hidden_h = torch.zeros(self.lstm.num_layers, batch_size, self.pred_hidden).to(
@@ -113,12 +129,18 @@ class RNNTDecoder(nn.Module):
         return label, hidden_h, hidden_c
 
     def input_names(self) -> List[str]:
+        """Return ONNX input names."""
+
         return ["x", "hi", "ci"]
 
     def output_names(self) -> List[str]:
+        """Return ONNX output names."""
+
         return ["dec", "ho", "co"]
 
     def dynamic_axes(self) -> Dict[str, Dict[int, str]]:
+        """Return dynamic axes used for ONNX export."""
+
         return {
             "x": {0: "batch_size"},
             "hi": {1: "batch_size"},

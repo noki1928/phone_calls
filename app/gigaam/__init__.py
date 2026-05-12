@@ -1,3 +1,5 @@
+"""Public GigaAM package API and model loading helpers."""
+
 import hashlib
 import logging
 import os
@@ -95,12 +97,14 @@ def _download_tokenizer(model_name: str, download_root: str) -> Optional[str]:
 
 
 def hash_path(ckpt_path: str) -> str:
-    """Calculate binary file hash for checksum"""
+    """Calculate a binary file hash for checksum validation."""
+
     return hashlib.md5(open(ckpt_path, "rb").read()).hexdigest()
 
 
 def _normalize_device(device: Optional[Union[str, torch.device]]) -> torch.device:
     """Normalize device parameter to torch.device."""
+
     if device is None:
         device_str = "cuda" if torch.cuda.is_available() else "cpu"
         return torch.device(device_str)

@@ -1,3 +1,5 @@
+"""Timestamp conversion helpers for token and word outputs."""
+
 from typing import List
 
 from .decoding import Tokenizer
@@ -25,6 +27,8 @@ def frames_to_words(
     current_frames: List[int] = []
 
     def commit():
+        """Flush the current token buffer into a word item."""
+
         if not current_chars:
             return
         text = "".join(current_chars).strip()
