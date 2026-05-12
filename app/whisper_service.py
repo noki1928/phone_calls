@@ -1,3 +1,5 @@
+"""WhisperX-based speech recognition and speaker diarization service."""
+
 import whisperx
 from whisperx.diarize import DiarizationPipeline
 
@@ -5,7 +7,11 @@ from app.config import settings
 
 
 class WhisperService:
+    """Load WhisperX models and produce speaker-attributed transcripts."""
+
     def __init__(self):
+        """Read transcription settings and prepare model placeholders."""
+
         self.device = settings.whisper.device
         self.model_size = settings.whisper.model_size
         self.compute_type = settings.whisper.compute_type
@@ -21,6 +27,8 @@ class WhisperService:
         self.diarize_model = None
 
     def initialize(self):
+        """Load the transcription, alignment, and diarization models."""
+
         print(f"Loading Whisper model: {self.model_size}")
         self.model = whisperx.load_model(
             self.model_size,
@@ -40,6 +48,8 @@ class WhisperService:
         print("All Whisper models loaded")
 
     def transcribe(self, audio_path: str) -> str:
+        """Transcribe an audio file and return text grouped by speaker."""
+
         if self.model is None:
             raise RuntimeError("Whisper service not initialized")
 
