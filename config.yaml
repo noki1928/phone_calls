@@ -4,7 +4,7 @@ whisper:
   compute_type: float32
   language: ru
   initial_prompt: >-
-    В разговоре может встречаться компания Нетикс или комап Netix. 
+    В разговоре может встречаться компания Нетикс или компания Netix. 
     Возможные термины: AnyDesk, автосервис, техподдержка.
   hf_token: null
   num_speakers: 2
