@@ -3,9 +3,6 @@ whisper:
   device: cpu
   compute_type: float32
   language: ru
-  initial_prompt: >-
-    В разговоре может встречаться компания Нетикс. Возможные термины:
-    GPON, ONT, роутер, биллинг, лицевой счет, техподдержка.
   hf_token: null
   num_speakers: 2
   min_speakers: 1

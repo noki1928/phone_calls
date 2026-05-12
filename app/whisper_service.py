@@ -16,7 +16,6 @@ class WhisperService:
         self.model_size = settings.whisper.model_size
         self.compute_type = settings.whisper.compute_type
         self.language = settings.whisper.language
-        self.initial_prompt = settings.whisper.initial_prompt
         self.hf_token = settings.hf_token
         self.num_speakers = settings.whisper.num_speakers
         self.min_speakers = settings.whisper.min_speakers
@@ -56,11 +55,7 @@ class WhisperService:
 
         audio = whisperx.load_audio(audio_path)
         
-        transcribe_options = {"language": self.language}
-        if self.initial_prompt:
-            transcribe_options["initial_prompt"] = self.initial_prompt
-
-        result = self.model.transcribe(audio, **transcribe_options)
+        result = self.model.transcribe(audio, language=self.language)
         
         result = whisperx.align(
             result["segments"],
